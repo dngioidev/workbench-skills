@@ -91,6 +91,15 @@ try {
     check(`${name}: route map present allows compaction`, run.status === 0 && run.output && !run.output.decision);
     check(`${name}: snapshot written into the workspace`, fs.existsSync(snapshot) &&
       fs.readFileSync(snapshot, 'utf8').includes('Ship the export button'));
+
+    // A manifest routeMap pointing outside the workspace must never be read into the snapshot
+    fs.writeFileSync(path.join(base, 'secret.md'), '## Current Goal\nTOP-SECRET-VALUE\n');
+    fs.writeFileSync(path.join(workspace, 'manifest.json'),
+      JSON.stringify([{ ...fixture.ticket, routeMap: '../secret.md' }]));
+    fs.rmSync(snapshot, { force: true });
+    runHook(hook, project, home);
+    check(`${name}: routeMap outside the workspace is not read`, !fs.existsSync(snapshot) ||
+      !fs.readFileSync(snapshot, 'utf8').includes('TOP-SECRET-VALUE'));
   }
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });

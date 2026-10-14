@@ -86,6 +86,16 @@ function reply(obj) {
   process.exit(0);
 }
 
+/**
+ * Resolve a manifest path, or return null if it points outside the workspace.
+ * manifest.json can come from a cloned repo, so never follow it elsewhere on disk.
+ */
+function workspacePath(cwd, relPath) {
+  const root = path.resolve(cwd, WORKSPACE) + path.sep;
+  const full = path.resolve(cwd, relPath);
+  return full.startsWith(root) ? full : null;
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -119,8 +129,8 @@ async function main() {
 
   // 4 ── Check which active tickets are missing a route map on disk ────────────
   const missingRouteMap = activeTickets.filter(t => {
-    if (!t.routeMap) return true;
-    return !fs.existsSync(path.join(cwd, t.routeMap));
+    const rmPath = t.routeMap && workspacePath(cwd, t.routeMap);
+    return !rmPath || !fs.existsSync(rmPath);
   });
 
   if (missingRouteMap.length > 0) {
@@ -175,8 +185,8 @@ async function main() {
     lines.push(``);
 
     // Extract key sections from the route map
-    if (ticket.routeMap) {
-      const rmPath = path.join(cwd, ticket.routeMap);
+    const rmPath = ticket.routeMap && workspacePath(cwd, ticket.routeMap);
+    if (rmPath) {
       try {
         const rmContent = fs.readFileSync(rmPath, 'utf8');
 
