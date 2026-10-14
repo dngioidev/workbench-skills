@@ -1,0 +1,153 @@
+# jira-workbench/config.yml
+# Workspace configuration for the Jira Ticket Workbench.
+# Created automatically on first use. Edit to customise behaviour.
+#
+# Fill in cloudId, projectKey and spaceKey with this project's real values
+# (ask the user if they are unknown). Never guess a cloudId: a wrong one
+# silently queries the wrong company's Jira site.
+
+workspaceRoot: jira-workbench
+
+jira:
+  cloudId: null      # site hostname (e.g. your-company.atlassian.net) or UUID cloud ID
+  projectKey: null   # e.g. PROJ
+  # Story-points custom field ID for this site, once identified — see
+  # references/documentation-modes.md ("Finding the story points field ID
+  # once, per site"). Leave null until confirmed; do not guess a
+  # customfield_XXXXX id.
+  storyPointsFieldId: null
+
+confluence:
+  spaceKey: null     # e.g. DOCS
+
+ticketTypes:
+  Epic: epic
+  Story: story
+  Task: task
+  Subtask: subtask
+  Bug: bug
+
+# Jira's portable done-ness signal (status.statusCategory.key). Status *names*
+# are project-specific ("To Do"/"In Progress"/"Done" on one project, something
+# else on another) but there are always exactly three categories: new,
+# indeterminate, done. Use this list, not a status-name list, to decide
+# whether a ticket is active.
+doneStatusCategories:
+  - done
+
+preserveSections:
+  - Local Notes
+  - Working Notes
+  - Implementation Notes
+  - Decisions
+  - Manual Notes
+  - Investigation Notes
+  - Developer Notes
+
+refreshPolicy:
+  activeTickets: refresh-if-jira-newer
+  doneTickets: refresh-only-when-requested
+  staleAfterDays: 3
+
+# Manually-attached Confluence pages that couldn't be auto-discovered (e.g. a
+# design doc that never mentions the ticket key). Populated by the
+# "note confluence page {url} against ticket {id}" intent.
+manualConfluenceLinks: {}
+# Example:
+# manualConfluenceLinks:
+#   PROJ-123:
+#     - url: https://your-company.atlassian.net/wiki/spaces/DOCS/pages/100002
+#       title: "Q3 Product Roadmap"
+
+documentationModes:
+  quickTrack:
+    description: Task/Subtask, or a simple Story with no complexity signals. Start with minimal files, then add optional files only when useful.
+    defaultFor:
+      - task
+      - subtask
+    defaultFiles:
+      - description
+      - route_map
+      - sync_log
+    optionalFiles:
+      - plan
+      - ac_trace
+      - dev_context
+      - working_notes
+      - debug_log
+      - test_evidence
+      - manual_verification
+      - pr_review
+      - code_review
+      - comment_resolution_plan
+      - context_pack
+      - final_summary
+
+  deliveryTrack:
+    description: Full implementation workflow for a Story/Task that is clearly complex, multi-session, or (when storyPointsFieldId is set) has story points >= 5.
+    storyPointsThreshold: 5
+    defaultFiles:
+      - description
+      - plan
+      - ac_trace
+      - dev_context
+      - route_map
+      - context_pack
+      - sync_log
+    optionalFiles:
+      - working_notes
+      - debug_log
+      - test_evidence
+      - manual_verification
+      - pr_review
+      - code_review
+      - comment_resolution_plan
+      - final_summary
+
+  investigationTrack:
+    description: Bug/root-cause workflow, especially when the cause is unknown.
+    appliesTo:
+      - bug
+    triggerWhen:
+      - root cause unknown
+      - repro steps unclear
+      - intermittent issue
+      - QA-only issue
+      - production-only issue
+      - cross-service issue
+      - logs/debugging required
+    defaultFiles:
+      - description
+      - repro_notes
+      - fix_analysis
+      - debug_log
+      - test_evidence
+      - route_map
+      - sync_log
+    optionalFiles:
+      - plan
+      - dev_context
+      - working_notes
+      - manual_verification
+      - pr_review
+      - comment_resolution_plan
+      - context_pack
+      - final_summary
+
+  overviewTrack:
+    description: Epic parent-child tracking workflow.
+    appliesTo:
+      - epic
+    defaultFiles:
+      - description
+      - overview
+      - relationship_map
+      - route_map
+      - context_pack
+      - sync_log
+    optionalFiles:
+      - working_notes
+      - dev_context
+      - pr_review
+      - comment_resolution_plan
+      - final_summary

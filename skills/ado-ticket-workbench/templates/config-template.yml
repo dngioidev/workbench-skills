@@ -1,0 +1,131 @@
+# ticket-workbench/config.yml
+# Workspace configuration for the ADO Ticket Workbench.
+# Created automatically on first use. Edit to customise behaviour.
+
+workspaceRoot: ticket-workbench
+
+ticketTypes:
+  Epic: epic
+  Feature: feature
+  Product Backlog Item: pbi
+  User Story: pbi
+  PBI: pbi
+  Bug: bug
+  Spike: spike
+
+doneStatuses:
+  - Done
+  - Closed
+  - Removed
+  - Resolved
+
+preserveSections:
+  - Local Notes
+  - Working Notes
+  - Implementation Notes
+  - Decisions
+  - Manual Notes
+  - Investigation Notes
+  - Developer Notes
+
+refreshPolicy:
+  activeTickets: refresh-if-azure-devops-newer
+  doneTickets: refresh-only-when-requested
+  staleAfterDays: 3
+
+documentationModes:
+  quickTrack:
+    description: Small or low-effort ticket workflow. Start with minimal files, then add optional files only when useful.
+    defaultEffort:
+      - 1
+      - 2
+      - 3
+    defaultFiles:
+      - description
+      - route_map
+      - sync_log
+    optionalFiles:
+      - plan
+      - ac_trace
+      - dev_context
+      - working_notes
+      - debug_log
+      - test_evidence
+      - manual_verification
+      - pr_review
+      - code_review
+      - comment_resolution_plan
+      - context_pack
+      - final_summary
+
+  deliveryTrack:
+    description: Full implementation workflow for medium or high-effort tickets.
+    defaultEffort:
+      - 5
+      - 8
+    defaultFiles:
+      - description
+      - plan
+      - ac_trace
+      - dev_context
+      - route_map
+      - context_pack
+      - sync_log
+    optionalFiles:
+      - working_notes
+      - debug_log
+      - test_evidence
+      - manual_verification
+      - pr_review
+      - code_review
+      - comment_resolution_plan
+      - final_summary
+
+  investigationTrack:
+    description: Bug/root-cause workflow, especially when the cause is unknown.
+    appliesTo:
+      - bug
+    triggerWhen:
+      - root cause unknown
+      - repro steps unclear
+      - intermittent issue
+      - QA-only issue
+      - production-only issue
+      - cross-service issue
+      - logs/debugging required
+    defaultFiles:
+      - description
+      - repro_notes
+      - fix_analysis
+      - debug_log
+      - test_evidence
+      - route_map
+      - sync_log
+    optionalFiles:
+      - plan
+      - dev_context
+      - working_notes
+      - manual_verification
+      - pr_review
+      - comment_resolution_plan
+      - context_pack
+      - final_summary
+
+  overviewTrack:
+    description: Epic or feature parent-child tracking workflow.
+    appliesTo:
+      - epic
+      - feature
+    defaultFiles:
+      - description
+      - overview
+      - relationship_map
+      - route_map
+      - context_pack
+      - sync_log
+    optionalFiles:
+      - working_notes
+      - dev_context
+      - pr_review
+      - comment_resolution_plan
+      - final_summary
