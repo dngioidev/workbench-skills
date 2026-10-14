@@ -59,7 +59,13 @@ curl -fsSL https://raw.githubusercontent.com/dngioidev/workbench-skills/main/ins
 ```bash
 git clone https://github.com/dngioidev/workbench-skills.git
 cd workbench-skills
-./install.sh --scope project --path ~/my-app     # or: ./install.ps1 -Scope project -Path D:\my-app
+./install.sh --scope project --path ~/my-app
+```
+
+On Windows (the default execution policy blocks running `.ps1` files directly):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -Scope project -Path D:\my-app
 ```
 
 | PowerShell | Bash | Meaning |
@@ -80,7 +86,7 @@ are never touched.
 1. Create `skills/<skill-name>/SKILL.md` with `name` and `description` frontmatter.
 2. Put any supporting files the skill references next to it in the same folder.
 3. Add a row to the Skills table above.
-4. Run the tests: `bash tests/test-install.sh` and `powershell -File tests/test-install.ps1`.
+4. Run the tests: `bash tests/test-install.sh` and `powershell -ExecutionPolicy Bypass -File tests/test-install.ps1`.
 
 ## License
 

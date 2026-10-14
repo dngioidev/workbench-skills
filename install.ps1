@@ -18,11 +18,22 @@ param(
     [switch]$Uninstall
 )
 
+# The body runs in a child scope so `irm | iex` does not leak settings or functions into the caller's session.
+& {
+param($Invocation, $ScriptRoot)
+
 $ErrorActionPreference = 'Stop'
 $Repo = 'dngioidev/workbench-skills'
 # Only set an exit code when run as a file; under `irm | iex`, exit would close the user's console.
-$RunAsFile = $MyInvocation.MyCommand.CommandType -eq 'ExternalScript'
-$LocalSkills = if ($PSScriptRoot) { Join-Path $PSScriptRoot 'skills' } else { $null }
+$RunAsFile = $Invocation.MyCommand.CommandType -eq 'ExternalScript'
+# Local mode only from a real clone, so a stray copy never treats an unrelated skills/ as the source.
+$LocalSkills = $null
+if ($ScriptRoot) {
+    $manifest = Join-Path (Join-Path $ScriptRoot '.claude-plugin') 'plugin.json'
+    if ((Test-Path -LiteralPath $manifest) -and ((Get-Content -Raw -LiteralPath $manifest) -match '"name":\s*"workbench"')) {
+        $LocalSkills = Join-Path $ScriptRoot 'skills'
+    }
+}
 
 function Test-Interactive {
     if (-not [Environment]::UserInteractive -or [Console]::IsInputRedirected) { return $false }
@@ -145,3 +156,4 @@ try {
     $failed = $true
 }
 if ($failed -and $RunAsFile) { exit 1 }
+} $MyInvocation $PSScriptRoot

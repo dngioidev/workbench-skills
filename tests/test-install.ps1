@@ -121,6 +121,32 @@ Get-Content -Raw -LiteralPath $Installer | Invoke-Expression
 '@
     $out = Invoke-Ps @($iexWrapper, $installer)
     Check 'iex form parses and asks for -Scope' ($out -match 'no -Scope given')
+
+    # irm | iex from a console: must not exit the session or leak settings/functions into it
+    $probe = "`$ErrorActionPreference = 'Continue'; Get-Content -Raw -LiteralPath '$installer' | Invoke-Expression; " +
+        "'eap=' + `$ErrorActionPreference; 'fn=' + [bool](Get-Command Invoke-Main -ErrorAction SilentlyContinue); 'still-alive'"
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($probe))
+    $out = & $ps -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand $encoded 2>$null | Out-String
+    Check 'iex form does not exit the session' ($out -match 'still-alive')
+    Check 'iex form keeps the caller ErrorActionPreference' ($out -match 'eap=Continue')
+    Check 'iex form does not leak functions' ($out -match 'fn=False')
+
+    # A copy of the installer next to an unrelated skills/ folder must not treat it as the source
+    $userHome = Join-Path $work 'home2'
+    $userClaude = Join-Path $userHome '.claude'
+    $mine = Join-Path (Join-Path $userClaude 'skills') 'mine'
+    New-Item -ItemType Directory -Path $mine -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $mine 'SKILL.md') -Value 'mine'
+    Copy-Item -LiteralPath $installer -Destination $userClaude
+    $env:USERPROFILE = $userHome
+    $env:HOME = $userHome
+    $env:WORKBENCH_ARCHIVE = $zip
+    Invoke-Ps @((Join-Path $userClaude 'install.ps1'), '-Scope', 'global') | Out-Null
+    $env:WORKBENCH_ARCHIVE = $null
+    $env:USERPROFILE = $savedProfile
+    $env:HOME = $savedHome
+    Check 'stray copy keeps the user''s own skills' (Test-Path -LiteralPath (Join-Path $mine 'SKILL.md'))
+    Check 'stray copy installs from the archive' (Test-AllInstalled (Join-Path $userClaude 'skills'))
 }
 finally {
     Remove-Item -LiteralPath $work -Recurse -Force
@@ -131,3 +157,4 @@ if ($script:failures -gt 0) {
     exit 1
 }
 Write-Host 'All tests passed'
+exit 0

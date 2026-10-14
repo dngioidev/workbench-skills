@@ -72,5 +72,15 @@ check "missing archive fails" fails env WORKBENCH_ARCHIVE="$work/missing.tar.gz"
   bash -c 'bash -s -- --scope project --path "$1" < "$2"' _ "$broken" "$installer"
 check "missing archive installs nothing" none_installed "$broken/.claude/skills"
 
+# A copy of the installer next to an unrelated skills/ folder must not treat it as the source
+userhome="$work/home2"
+mkdir -p "$userhome/.claude/skills/mine"
+echo mine > "$userhome/.claude/skills/mine/SKILL.md"
+cp "$installer" "$userhome/.claude/install.sh"
+check "stray copy exits 0" runs_ok env HOME="$userhome" WORKBENCH_ARCHIVE="$work/archive.tar.gz" \
+  bash "$userhome/.claude/install.sh" --scope global
+check "stray copy keeps the user's own skills" test -f "$userhome/.claude/skills/mine/SKILL.md"
+check "stray copy installs from the archive" all_installed "$userhome/.claude/skills"
+
 if [ "$failures" -gt 0 ]; then echo "$failures test(s) failed"; exit 1; fi
 echo "All tests passed"

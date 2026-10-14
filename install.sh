@@ -70,7 +70,9 @@ if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 fi
 
-if [ -n "$script_dir" ] && [ -d "$script_dir/skills" ]; then
+# Local mode only from a real clone, so a stray copy never treats an unrelated skills/ as the source.
+if [ -n "$script_dir" ] && [ -d "$script_dir/skills" ] &&
+  grep -q '"name": *"workbench"' "$script_dir/.claude-plugin/plugin.json" 2>/dev/null; then
   src="$script_dir/skills"
 else
   tmp="$(mktemp -d)"
