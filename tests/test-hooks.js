@@ -100,6 +100,18 @@ try {
     runHook(hook, project, home);
     check(`${name}: routeMap outside the workspace is not read`, !fs.existsSync(snapshot) ||
       !fs.readFileSync(snapshot, 'utf8').includes('TOP-SECRET-VALUE'));
+
+    // Same through a link inside the workspace (junction on Windows needs no admin rights)
+    const outside = path.join(base, 'outside');
+    fs.mkdirSync(outside, { recursive: true });
+    fs.writeFileSync(path.join(outside, 'secret.md'), '## Current Goal\nTOP-SECRET-VALUE\n');
+    fs.symlinkSync(outside, path.join(workspace, 'link'), 'junction');
+    fs.writeFileSync(path.join(workspace, 'manifest.json'),
+      JSON.stringify([{ ...fixture.ticket, routeMap: `${fixture.workspace}/link/secret.md` }]));
+    fs.rmSync(snapshot, { force: true });
+    runHook(hook, project, home);
+    check(`${name}: routeMap through a symlink out of the workspace is not read`, !fs.existsSync(snapshot) ||
+      !fs.readFileSync(snapshot, 'utf8').includes('TOP-SECRET-VALUE'));
   }
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });

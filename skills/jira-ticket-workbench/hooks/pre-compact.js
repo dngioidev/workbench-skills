@@ -87,13 +87,18 @@ function reply(obj) {
 }
 
 /**
- * Resolve a manifest path, or return null if it points outside the workspace.
+ * Resolve a manifest path, or return null if it is missing or points outside the workspace.
  * manifest.json can come from a cloned repo, so never follow it elsewhere on disk.
+ * Real paths are compared so symlinks inside the workspace (or a symlinked workspace) can't escape.
  */
 function workspacePath(cwd, relPath) {
-  const root = path.resolve(cwd, WORKSPACE) + path.sep;
-  const full = path.resolve(cwd, relPath);
-  return full.startsWith(root) ? full : null;
+  try {
+    const root = path.join(fs.realpathSync(cwd), WORKSPACE) + path.sep;
+    const full = fs.realpathSync(path.resolve(cwd, relPath));
+    return full.startsWith(root) ? full : null;
+  } catch {
+    return null;
+  }
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -129,8 +134,7 @@ async function main() {
 
   // 4 ── Check which active tickets are missing a route map on disk ────────────
   const missingRouteMap = activeTickets.filter(t => {
-    const rmPath = t.routeMap && workspacePath(cwd, t.routeMap);
-    return !rmPath || !fs.existsSync(rmPath);
+    return !(t.routeMap && workspacePath(cwd, t.routeMap));
   });
 
   if (missingRouteMap.length > 0) {
