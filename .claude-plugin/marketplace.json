@@ -1,0 +1,18 @@
+{
+  "name": "workbench-skills",
+  "owner": {
+    "name": "dngioidev"
+  },
+  "metadata": {
+    "description": "Skills that save AI agent work into a per-ticket workbench folder.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "workbench",
+      "source": "./",
+      "description": "Save agent work into a workbench/ folder organized by ticket (Jira, Azure DevOps, GitHub Projects, ...).",
+      "version": "0.1.0"
+    }
+  ]
+}

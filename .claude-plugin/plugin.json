@@ -1,0 +1,12 @@
+{
+  "name": "workbench",
+  "version": "0.1.0",
+  "description": "Save agent work into a workbench/ folder organized by ticket (Jira, Azure DevOps, GitHub Projects, ...).",
+  "author": {
+    "name": "dngioidev"
+  },
+  "homepage": "https://github.com/dngioidev/workbench-skills",
+  "repository": "https://github.com/dngioidev/workbench-skills",
+  "license": "MIT",
+  "keywords": ["workbench", "tickets", "jira", "azure-devops", "github-projects"]
+}
