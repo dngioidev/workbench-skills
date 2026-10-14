@@ -1,0 +1,42 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  bash:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bash installer tests
+        shell: bash
+        run: bash tests/test-install.sh
+
+  powershell:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Windows PowerShell 5.1 installer tests
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: ./tests/test-install.ps1
+      - name: PowerShell 7 installer tests
+        shell: pwsh
+        run: ./tests/test-install.ps1
+
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Manifests are valid JSON
+        run: jq empty .claude-plugin/marketplace.json .claude-plugin/plugin.json
